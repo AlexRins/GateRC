@@ -9,35 +9,53 @@
 #include "common.h"
 #include "scan.h"
 
-volatile int16_t t1;
+
+
+volatile int16_t tr[EDGES_COUNT] = {0xff};
+volatile int16_t tf[EDGES_COUNT] = {0xff};
+volatile unsigned char index = 0;
 
 
 ISR (INT0_vect){
 // Rising edge interupt
     cli();
-    t1 = TCNT0;
-    TCNT0 = 0;    
+    tr [index] = TCNT1;
+    TCNT1 = 0;    
     sei();
 }
 
 ISR (INT1_vect){
 // Failing edge interupt
-
+    cli();
+    tf [index] = TCNT1;
+    TCNT1 = 0;
+    if( ++index >= EDGES_COUNT){
+        index = 0;
+    }
+    sei();
 }
 
-int main(void){
-    
+
+// Configure timer 1
+void setup_timer_1(void){
+    // https://www.arxterra.com/9-atmega328p-timers/
+    // disable global interrupts
+    TCCR1A = 0;     // set entire TCCR1A register to 0
+    TCCR1B = 0;     // same for TCCR1B
+    _SET_1( TCCR1B, CS11); // prescaler = 8
+    TCNT1 = 0;
+    sei();
+}
+
+// Setup
+void setup(void){    
     usart_init();
-    // setting timer 1
-    
-
     printf("test");
-
+    cli();                            // disable interupts globaly
     _DIR_IN(IN_DIR, IN_R);            // data input "in" rising edge
     _DIR_IN(IN_DIR, IN_F);            // data input "in" failing edge
 
-    cli();                              // disable interupts globaly
-    
+    // Setting external interupts
     EICRA = 0;
 
     _SET_0(EICRA, ISC10);               
@@ -49,6 +67,28 @@ int main(void){
     _SET_1(EIMSK, INT0);
     _SET_1(EIMSK, INT1);                // enable INT0 and INT1
 
+    setup_timer_1();
+    sei();                               // enable interupts globaly
 
-    // https://www.arxterra.com/9-atmega328p-timers/
+}
+
+unsigned char inc_i(unsigned char index){
+    if (++index == EDGES_COUNT){
+        index = 0;
+    }
+}
+
+unsigned char dec_i(unsigned char index){
+    if (index)
+}
+int main(void){
+
+    setup();
+
+    while(true){
+        if ((tf[index] - tr[index]) != 0)
+
+    }
+
+
 }
