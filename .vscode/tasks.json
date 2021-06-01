@@ -1,0 +1,22 @@
+{
+    // See https://go.microsoft.com/fwlink/?LinkId=733558
+    // for the documentation about the tasks.json format
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "compile_avr",
+            "type": "shell",
+            "command": "${workspaceFolder}/Compile_Upload.sh",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "burn_avr",
+            "type": "shell",
+            "command": "${workspaceFolder}/burn.sh"
+        }
+    ]
+}

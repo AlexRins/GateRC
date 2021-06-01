@@ -1,0 +1,28 @@
+{
+    "configurations": [
+        {
+            "name": "Linux",
+            "includePath": [
+                "/usr/lib/avr/include",
+                "${workspaceFolder}/src",
+                "${workspaceFolder}/mylib"
+            ],
+            "browse": {
+                "limitSymbolsToIncludedHeaders": true,
+                "path": [
+                    "/usr/lib/avr/include",
+                    "${workspaceFolder}/src",
+                    "${workspaceFolder}/mylib"
+                ]
+            },
+            "defines": [
+                "__AVR_ATmega328P__",
+                "F_CPU=16000000L"
+            ],
+            "intelliSenseMode": "gcc-x86",
+            "cStandard": "c11",
+            "cppStandard": "c++11"
+        }
+    ],
+    "version": 4
+}
