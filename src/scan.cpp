@@ -13,17 +13,18 @@
 
 volatile int16_t t[EDGES_COUNT] = {0xff};
 volatile unsigned char index = 0;
-
+volatile unsigned char preambleCount = 0;
+volatile unsigned char prevTime = 0;
+volatile bool startCount = false;
 
 ISR (INT0_vect){
 // Rising edge interupt
     cli();
     t[index] = TCNT1;
     TCNT1 = 0;
-    index++;
     _SET_1(EIMSK, INT1); // enable INT1 (failing edge)
-    if (index == EDGES_COUNT){
-        index = 0;
+    if(index == 0){
+        t[index] = 0;
     }
     sei();
 }
@@ -33,7 +34,14 @@ ISR (INT1_vect){
     cli();
     t [index] = TCNT1;
     TCNT1 = 0;
-    index++;
+    if (prevTime != 0)
+    if (t[index-1]==t[index]){
+        preambleCount++;
+        index++;
+    }else{
+        preambleCount = 0;
+    }
+
     if (index == EDGES_COUNT){
         index = 0;
     }
