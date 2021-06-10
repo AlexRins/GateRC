@@ -11,8 +11,6 @@
 
 #define EDGES_COUNT 50
 
-#define T1_EN _SET_1(TIMSK1,OCIE1A) // enable interupt on timer 1 compare match
-#define T1_DIS _SET_0(TIMSK1,OCIE1A) // disable interupt on timer 1 compare match
 
 #endif
 

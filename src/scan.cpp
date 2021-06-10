@@ -11,31 +11,50 @@
 
 
 
-volatile int16_t t[EDGES_COUNT] = {0xff};
-volatile unsigned char index = 0;
+volatile int16_t t1[EDGES_COUNT] = {0xff}; // timing of high phase
+volatile int16_t t0[EDGES_COUNT] = {0xff}; // timing of low phase
+volatile unsigned char index = 0; // current counter index
 volatile unsigned char preambleCount = 0;
-volatile unsigned char prevTime = 0;
-volatile bool startCount = false;
+volatile bool stopCount = false;
 
-ISR (INT0_vect){
+
 // Rising edge interupt
+ISR (INT0_vect){
+
     cli();
-    t[index] = TCNT1;
+    t0[index] = TCNT1;
     TCNT1 = 0;
-    _SET_1(EIMSK, INT1); // enable INT1 (failing edge)
-    if(index == 0){
-        t[index] = 0;
+    //_SET_1(EIMSK, INT1); // enable INT1 (failing edge)
+    if(index != 0 ){
+        if(preambleCount < 11){
+            if(t0[index] == t0[index-1]){
+                preambleCount++;
+                index++;
+            }
+            else{
+                preambleCount = 0;
+                index = 0;
+            }
+        }
+        else{
+            if(index < EDGES_COUNT){
+                index++;
+            }
+        }
     }
+    else{
+        index++;
+    }
+ 
     sei();
 }
 
-ISR (INT1_vect){
 // Failing edge interupt
+ISR (INT1_vect){
     cli();
-    t [index] = TCNT1;
+    t1 [index] = TCNT1;
     TCNT1 = 0;
-    if (prevTime != 0)
-    if (t[index-1]==t[index]){
+     if (t1[index]==t0[index]){
         preambleCount++;
         index++;
     }else{
@@ -83,32 +102,22 @@ void setup(void){
 
 }
 
-unsigned char inc_i(unsigned char inc){
-    char i = 0;
-    i = index + inc;
-    if (i >= EDGES_COUNT){
-        i = i - EDGES_COUNT;
-    }
-}
-
-unsigned char dec_i(unsigned char dec){
-    if (index == 0){
-        index = EDGES_COUNT;
-    }
-    index--;
-
-}
 
 int main(void){
 
     setup();
 
     while(true){
-        
-
+        if(index == EDGES_COUNT){
+            _SET_0(EIMSK, INT0); // disable rising edge interupt
+            for (unsigned char i=0; i<=EDGES_COUNT; i++){
+                printf("%d, ",t0[i]);
+            }
+            index == 0;
+            _SET_1(EIMSK, INT0);                // enable INT0 (rising edge)
         }
-
     }
 
-
 }
+
+
